@@ -10,20 +10,41 @@ import Admin from "./pages/admin";
 import LandingPage from "./pages/landingPage";
 import Dashboard from "./pages/dashboard";
 import AdminLogin from "./pages/adminLogin";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-        <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin" element={<AdminPlans />} />
-        <Route path="/admin/requests" element={<AdminRequests />} />
-        <Route path="/admin/panel" element={<Admin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* Protected User Routes */}
+        <Route path="/dashboard/*" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected Admin Routes */}
+        <Route path="/admin" element={
+          <AdminProtectedRoute>
+            <AdminPlans />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/admin/requests" element={
+          <AdminProtectedRoute>
+            <AdminRequests />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/admin/panel" element={
+          <AdminProtectedRoute>
+            <Admin />
+          </AdminProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );
