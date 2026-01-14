@@ -2,30 +2,25 @@ const Plan = require('../model/plan');
 const Status = require('../model/userPlanStatus');
 
 const createPlan = async (req, res) => {
-    try{
-        const {name, description, price, type} = req.body;
-        const existingPlan = await Plan.findOne({
-            name: name
-        })
-
-        if(existingPlan){
-            return res.status(400).json({message: "Plan with this name already exists"});
-        }
-
-        const plan = new Plan({
-            name,
-            description,
-            price,
-            type
-        });
-
-        await plan.save();
-        
-        res.status(201).json({message: "Plan created successfully", plan});
+    try {
+      const { name, description, price, type } = req.body;
+  
+      // Check if a plan with the same name exists
+      const existingPlan = await Plan.findOne({ name });
+      if (existingPlan) {
+        return res.status(400).json({ message: "Plan with this name already exists" });
+      }
+  
+      // Create new plan
+      const plan = new Plan({ name, description, price, type });
+      await plan.save();
+  
+      res.status(201).json({ message: "Plan created successfully", plan });
     } catch (error) {
-        res.status(500).json({message: "Internal server error"});
+      console.error("Error creating plan:", error);
+      res.status(500).json({ message: error.message });
     }
-}
+  };
 
 const getAllPlans = async (req, res) => {
     try {

@@ -13,7 +13,7 @@ const adminLogin = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
     }
-
+  
     const isPassValid = await bcrypt.compare(
       password,
       process.env.ADMIN_PASSWORD

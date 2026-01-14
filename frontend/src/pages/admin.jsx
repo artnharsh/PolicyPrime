@@ -7,7 +7,7 @@ const Admin = () => {
     name: "",
     description: "",
     price: "",
-    duration: "",
+    type: "",
   });
 
   // Fetch all user plan statuses
@@ -53,23 +53,31 @@ const Admin = () => {
   // Create a new plan
   const createPlan = async (e) => {
     e.preventDefault();
+
     try {
       const response = await fetch("http://localhost:5000/api/admin/plans", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          "Authorization": `Bearer ${localStorage.getItem("adminToken")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newPlan),
       });
+
+      const data = await response.json(); // Important! Parse the response
+
       if (response.ok) {
         alert("Plan created successfully!");
-        setNewPlan({ name: "", description: "", price: "", duration: "" });
+        setNewPlan({ name: "", description: "", price: "", type: "" }); // Reset form
+        console.log(data.plan); // You can use the created plan if needed
+      } else {
+        alert(data.message || "Failed to create plan");
       }
     } catch (error) {
       console.error("Error creating plan:", error);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#050910] via-[#0b1224] to-[#0a1a35] text-slate-100">
@@ -113,21 +121,19 @@ const Admin = () => {
                 setActiveTab("requests");
                 fetchUserPlanStatuses();
               }}
-              className={`px-6 py-3 rounded-t-xl font-medium transition-all ${
-                activeTab === "requests"
+              className={`px-6 py-3 rounded-t-xl font-medium transition-all ${activeTab === "requests"
                   ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border-b-2 border-amber-500"
                   : "text-slate-400 hover:text-slate-200"
-              }`}
+                }`}
             >
               User Requests
             </button>
             <button
               onClick={() => setActiveTab("create")}
-              className={`px-6 py-3 rounded-t-xl font-medium transition-all ${
-                activeTab === "create"
+              className={`px-6 py-3 rounded-t-xl font-medium transition-all ${activeTab === "create"
                   ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border-b-2 border-amber-500"
                   : "text-slate-400 hover:text-slate-200"
-              }`}
+                }`}
             >
               Create Plan
             </button>
@@ -169,13 +175,12 @@ const Admin = () => {
                             {status.userId?.name || "User"}
                           </h3>
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              status.status === "pending"
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${status.status === "pending"
                                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                                 : status.status === "approved"
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                : "bg-red-500/20 text-red-300 border border-red-500/30"
-                            }`}
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                  : "bg-red-500/20 text-red-300 border border-red-500/30"
+                              }`}
                           >
                             {status.status}
                           </span>
@@ -280,19 +285,25 @@ const Admin = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-slate-200">
-                      Duration (months)
+                      Plan Type
                     </label>
-                    <input
-                      type="number"
-                      value={newPlan.duration}
+                    <select
+                      value={newPlan.type}
                       onChange={(e) =>
-                        setNewPlan({ ...newPlan, duration: e.target.value })
+                        setNewPlan({ ...newPlan, type: e.target.value })
                       }
-                      placeholder="12"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-500/60 outline-none transition"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-500/60 outline-none transition"
                       required
-                    />
+                    >
+                      <option value="" disabled>
+                        Select plan type
+                      </option>
+                      <option value="Basic">Basic</option>
+                      <option value="Standard">Standard</option>
+                      <option value="Premium">Premium</option>
+                    </select>
                   </div>
+
                 </div>
 
                 <button

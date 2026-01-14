@@ -24,26 +24,31 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
     try {
+      setLoading(true);
       const response = await axios.post("http://localhost:5000/api/users/login", {
         email: formData.email,
         password: formData.password,
       });
+  
       console.log("LOGIN SUCCESS →", response.data);
-      // Redirect or update UI on successful login
-
+  
+      // Store token and user
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+  
       setLoading(false);
       setError(null);
       setSuccess("Login successful!");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+  
+      // Redirect immediately
+      navigate("/dashboard");
     } catch (err) {
       console.error("LOGIN FAIL →", err.response?.data || err.message);
+      setLoading(false);
+      setError(err.response?.data || "Login failed");
     }
-  }
+  };
 
 
   return (

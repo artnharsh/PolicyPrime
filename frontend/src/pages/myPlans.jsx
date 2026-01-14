@@ -1,94 +1,87 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const MyPlans = () => {
-  const [userPlans] = useState([
-    {
-      id: 1,
-      name: "Health Plus Plan",
-      status: "active",
-      coverage: "$50,000",
-      startDate: "2024-01-15",
-      endDate: "2025-01-15",
-    },
-    {
-      id: 2,
-      name: "Life Shield Plan",
-      status: "pending",
-      coverage: "$100,000",
-      startDate: "2024-02-01",
-      endDate: "2025-02-01",
-    },
-  ]);
+  const [userPlans, setUserPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserPlans = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/users/getmyplans",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        // Map the populated plan data
+        const plansWithDetails = response.data.map((userPlan) => ({
+          _id: userPlan._id,
+          status: userPlan.status,
+          name: userPlan.plan_id?.name || "Unnamed Plan",
+          description: userPlan.plan_id?.description || "-",
+          price: userPlan.plan_id?.price || 0,
+          type: userPlan.plan_id?.type || "Basic",
+          createdAt: userPlan.plan_id?.createdAt || null,
+        }));
+
+        setUserPlans(plansWithDetails);
+      } catch (err) {
+        console.error("Error fetching user plans:", err);
+        setError("Failed to load your plans.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserPlans();
+  }, []);
+
+  if (loading) return <p className="text-white">Loading your plans...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">My Policies</h2>
-        <button className="px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 hover:bg-sky-500/20 transition">
-          View All
-        </button>
-      </div>
+      <h2 className="text-2xl font-semibold text-white mb-4">My Plans</h2>
 
       <div className="grid gap-4">
         {userPlans.map((plan) => (
           <div
-            key={plan.id}
+            key={plan._id}
             className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 hover:border-sky-500/30 transition"
           >
             <div className="flex items-start justify-between">
-              <div className="space-y-3 flex-1">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-white">
-                    {plan.name}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      plan.status === "active"
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                    }`}
-                  >
-                    {plan.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-slate-400">Coverage</p>
-                    <p className="text-white font-semibold">{plan.coverage}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Start Date</p>
-                    <p className="text-white font-semibold">
-                      {new Date(plan.startDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">End Date</p>
-                    <p className="text-white font-semibold">
-                      {new Date(plan.endDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Status</p>
-                    <p className="text-white font-semibold capitalize">
-                      {plan.status}
-                    </p>
-                  </div>
+              <div className="space-y-2 flex-1">
+                <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
+                <p className="text-slate-300 text-sm">{plan.description}</p>
+                <div className="flex gap-4 text-sm mt-2">
+                  <span className="text-slate-400">Type:</span>
+                  <span className="text-white">{plan.type}</span>
+                  <span className="text-slate-400">Price:</span>
+                  <span className="text-white">${plan.price}</span>
+                  <span className="text-slate-400">Status:</span>
+                  <span className="text-white capitalize">{plan.status}</span>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <button className="px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 hover:bg-sky-500/20 transition">
-                  View Details
-                </button>
-                {plan.status === "active" && (
-                  <button className="px-4 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 transition">
-                    Renew
-                  </button>
-                )}
+              <div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    plan.status === "active"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                  }`}
+                >
+                  {plan.status}
+                </span>
               </div>
             </div>
+            <p className="text-slate-400 text-xs mt-2">
+              Created: {plan.createdAt ? new Date(plan.createdAt).toLocaleDateString() : "-"}
+            </p>
           </div>
         ))}
       </div>

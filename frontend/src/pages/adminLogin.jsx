@@ -1,12 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
-import {useState} from "react";
+import { useState } from "react";
+import axios from "axios"
 
 const AdminLogin = () => {
 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: ''  
+    password: ''
   })
 
   const handleChange = (e) => {
@@ -16,21 +17,25 @@ const AdminLogin = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Perform login logic here (e.g., API call)
     try {
-      const response = axios.post("http://localhost:5000/api/admin/login", {
+      const response = await axios.post("http://localhost:5000/api/admin/login", {
         email: formData.email,
         password: formData.password
       });
       console.log("Login successful:", response.data);
-    } catch (error) {
-      console.error("Login failed:", error);
 
+      localStorage.setItem("adminToken", response.data.token);
+      localStorage.setItem("admin", JSON.stringify(response.data.user));
+      // On successful login, navigate to the admin dashboard
+      navigate('/admin/panel');
+
+    } catch (error) {
+      console.error("Login failed:", error.message);
     }
-    // On successful login, navigate to the admin dashboard
-    navigate('/admin/panel');
+
   }
 
   return (

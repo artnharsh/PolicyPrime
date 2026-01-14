@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, navigate } from "react";
 import Plans from "./plans";
 import MyPlans from "./myPlans";
 import Status from "./status";
 import Profile from "./profile";
+import { useNavigate } from "react-router-dom"; 
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const navigate = useNavigate(); 
+  const handleLogout = () => {
+  // Remove token and user from localStorage
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  // Redirect to login page
+  navigate("/login");
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#050910] via-[#0b1224] to-[#0a1a35] text-slate-100">
@@ -49,7 +59,8 @@ const Dashboard = () => {
               >
                 Profile
               </button>
-              <button className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 transition">
+              <button onClick={handleLogout} className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 transition">
+
                 Logout
               </button>
             </div>
